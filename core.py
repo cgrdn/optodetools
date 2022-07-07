@@ -69,3 +69,45 @@ def correct_response_time(t, DO, T, thickness):
     DO_out = f(t_sec)
 
     return DO_out
+
+def sample_Tconst(t, DO, tau):
+    # convert time to seconds
+    t_sec = t*24*60*60
+
+    N = DO.shape[0]
+    c_filt = np.nan*np.ones((N,))
+    c_filt[0] = DO[0]
+
+    for i in range(N-1):
+        dt = t_sec[i+1] - t_sec[i]
+        c_filt[i+1] = oxy_a(dt, tau)*c_filt[i] + oxy_b(dt, tau)*(DO[i+1]+DO[i])
+    
+    return c_filt
+
+def sample(t, DO, T, thickness):
+    # convert time to seconds
+    t_sec = t*24*60*60
+
+    mean_temp = T[:-1] + np.diff(T)/2
+
+    N = DO.shape[0]
+    c_filt = np.nan*np.ones((N,))
+    c_filt[0] = DO[0]
+
+    # load temperature, boundary layer thickness, and tau matrix from 
+    # look-up table provided in the supplement to Bittig and Kortzinger (2017)
+    lut_lL = lut_data[0,1:]
+    lut_T  = lut_data[1:,0]
+    tau100 = lut_data[1:,1:]
+    thickness = thickness*np.ones((N-1,))
+
+    # translate boundary layer thickness to temperature dependent tau
+    f_thickness = interp2d(lut_T, lut_lL, tau100.T, bounds_error=False)
+    tau_T = np.squeeze(f_thickness(mean_temp, thickness))[0,:]
+    # loop through oxygen data 
+    for i in range(N-1):
+        dt = t_sec[i+1] - t_sec[i]
+
+        c_filt[i+1] = oxy_a(dt, tau_T[i])*c_filt[i] + oxy_b(dt, tau_T[i])*(DO[i+1]+DO[i])
+    
+    return c_filt
