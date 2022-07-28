@@ -10,6 +10,7 @@ setuptools.setup(
     name='optodetools',
     version='0.1',
     license='The MIT License (MIT)',
+    author='Christopher Gordon',
     author_email='chris.gordon@dfo-mpo.gc.ca',
     description='A python library for simulating and correcting oxygen optode time response error',
     long_description=long_description,
