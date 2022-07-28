@@ -1,0 +1,12 @@
+/data/
+.vscode
+*cpython*
+*.pyc
+*checkpoint*
+/tmp/
+.DS_Store
+.config
+admt/
+dist/
+build/
+figures/
