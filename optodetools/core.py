@@ -34,7 +34,7 @@ def correct_response_time_Tconst(t, DO, tau):
 
     return DO_out
 
-from lut import lut as lut_data
+from .lut import lut as lut_data
 
 def correct_response_time(t, DO, T, thickness):
 
@@ -47,16 +47,8 @@ def correct_response_time(t, DO, T, thickness):
     mean_time = t_sec[:-1] + np.diff(t_sec)/2
     mean_temp = T[:-1] + np.diff(T)/2
 
-    # load temperature, boundary layer thickness, and tau matrix from 
-    # look-up table provided in the supplement to Bittig and Kortzinger (2017)
-    lut_lL = lut_data[0,1:]
-    lut_T  = lut_data[1:,0]
-    tau100 = lut_data[1:,1:]
-    thickness = thickness*np.ones((N-1,))
+    tau_T = lookup_tau(thickness, mean_temp)
 
-    # translate boundary layer thickness to temperature dependent tau
-    f_thickness = interp2d(lut_T, lut_lL, tau100.T, bounds_error=False)
-    tau_T = np.squeeze(f_thickness(mean_temp, thickness))[0,:]
     # loop through oxygen data 
     for i in range(N-1):
         dt = t_sec[i+1] - t_sec[i]
@@ -94,16 +86,8 @@ def sample(t, DO, T, thickness):
     c_filt = np.nan*np.ones((N,))
     c_filt[0] = DO[0]
 
-    # load temperature, boundary layer thickness, and tau matrix from 
-    # look-up table provided in the supplement to Bittig and Kortzinger (2017)
-    lut_lL = lut_data[0,1:]
-    lut_T  = lut_data[1:,0]
-    tau100 = lut_data[1:,1:]
-    thickness = thickness*np.ones((N-1,))
+    tau_T = lookup_tau(thickness, mean_temp)
 
-    # translate boundary layer thickness to temperature dependent tau
-    f_thickness = interp2d(lut_T, lut_lL, tau100.T, bounds_error=False)
-    tau_T = np.squeeze(f_thickness(mean_temp, thickness))[0,:]
     # loop through oxygen data 
     for i in range(N-1):
         dt = t_sec[i+1] - t_sec[i]
@@ -111,3 +95,18 @@ def sample(t, DO, T, thickness):
         c_filt[i+1] = oxy_a(dt, tau_T[i])*c_filt[i] + oxy_b(dt, tau_T[i])*(DO[i+1]+DO[i])
     
     return c_filt
+
+def lookup_tau(thickness, T):
+    # load temperature, boundary layer thickness, and tau matrix from 
+    # look-up table provided in the supplement to Bittig and Kortzinger (2017)
+    N = T.shape[0]
+    lut_lL = lut_data[0,1:]
+    lut_T  = lut_data[1:,0]
+    tau100 = lut_data[1:,1:]
+    thickness = thickness*np.ones((N,))
+
+    # translate boundary layer thickness to temperature dependent tau
+    f_thickness = interp2d(lut_T, lut_lL, tau100.T, bounds_error=False)
+    tau_T = np.squeeze(f_thickness(T, thickness))[0,:]
+
+    return tau_T
