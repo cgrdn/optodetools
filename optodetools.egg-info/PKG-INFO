@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: optodetools
-Version: 0.1
+Version: 0.1.1
 Summary: A python library for simulating and correcting oxygen optode time response error
 Home-page: https://github.com/cgrdn/optodetools
 Author: Christopher Gordon

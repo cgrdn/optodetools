@@ -8,10 +8,11 @@ with open('requirements.txt') as fr:
 
 setuptools.setup(
     name='optodetools',
-    version='0.1',
+    version='0.1.1',
     license='The MIT License (MIT)',
     author='Christopher Gordon',
     author_email='chris.gordon@dfo-mpo.gc.ca',
+    maintainer='cgrdn',
     description='A python library for simulating and correcting oxygen optode time response error',
     long_description=long_description,
     long_description_content_type='text/markdown',
